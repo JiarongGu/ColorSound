@@ -19,6 +19,9 @@ namespace ColorSound
 {
     public sealed class StartupTask : IBackgroundTask
     {
+        private static int SAMPLE_RATE = 50;
+        private static int MAX_IDLE = 2 * 1000 / 50; // 2 seconds
+
         KeyWaveProvider keyWaveProvider = new KeyWaveProvider();
         ThreeWaveProvider threeWaveProvider = new ThreeWaveProvider();
 
@@ -26,68 +29,65 @@ namespace ColorSound
         {
             // PlayAssetMusic("Tokyo Teddy Bear - Hatsune Miku.mp3");
 
-            var waveOut1 = new WasapiOutRT(AudioClientShareMode.Shared, 200);
-            keyWaveProvider.SetWaveFormat(16000, 1);
-            keyWaveProvider.Key = 0;
-
+            var waveOut1 = new WasapiOutRT(AudioClientShareMode.Shared, SAMPLE_RATE * 4);
+            keyWaveProvider.SetWaveFormat(44100, 1);
             waveOut1.Init(() => keyWaveProvider);
             // waveOut1.Play();
 
-            var waveOut2 = new WasapiOutRT(AudioClientShareMode.Shared, 200);
-            threeWaveProvider.SetWaveFormat(16000, 2);
+            var waveOut2 = new WasapiOutRT(AudioClientShareMode.Shared, SAMPLE_RATE * 4);
+            threeWaveProvider.SetWaveFormat(44100, 2);
             waveOut2.Init(() => threeWaveProvider);
             waveOut2.Play();
 
-            var rotarySensor = DeviceFactory.Build.RotaryAngleSensor(Pin.AnalogPin0);
             var accelerometer = DeviceFactory.Build.ThreeAxisAccelerometerADXL345();
             var display = DeviceFactory.Build.RgbLcdDisplay();
-            
+
             // init devices
-            display.SetBacklightRgb(255, 255, 255);
             accelerometer.Initialize();
-
-            var timer = new System.Timers.Timer(100);
-            timer.Elapsed += (o, e) =>
-            {
-                if (keyWaveProvider.Key > 40)
-                {
-                    keyWaveProvider.Key = 0;
-                }
-                keyWaveProvider.Key++;
-            };
-
-            timer.Start();
+                
 
             var lastXyz = accelerometer.GetAcclXYZ();
+            var last = 0;
 
             while (true)
             {
-                // degree from 0 - 300
-                // amplitude from 0 - 1
-                var degrees = rotarySensor.Degrees();
                 var xyz = accelerometer.GetAcclXYZ();
-
-                keyWaveProvider.Amplitude = Math.Pow(2, degrees / 300) - 1;
 
                 if (IsAcclUpdated(lastXyz, xyz))
                 {
                     threeWaveProvider.Play(xyz[0] * 1000, xyz[1] * 1000, xyz[2] * 1000);
+
+                    var key = Math.Sqrt(
+                        + Math.Pow(xyz[0] - lastXyz[0], 2) 
+                        + Math.Pow(xyz[1] - lastXyz[1], 2) 
+                        + Math.Pow(xyz[2] - lastXyz[2], 2)
+                    ) * 20;
+
+                    // var key = Math.Sqrt(Math.Pow(xyz[0], 2) + Math.Pow(xyz[1], 2) + Math.Pow(xyz[2], 2)) * 5;
+                    display.SetText($"Key: {key}");
+
+                    keyWaveProvider.Play(key);
                     lastXyz = xyz;
+                    last = 0;
+                }
+                else if (last > MAX_IDLE)
+                {
+                    threeWaveProvider.Pause();
+                    keyWaveProvider.Pause();
                 }
                 else 
                 {
-                    threeWaveProvider.Pause();
+                    last += SAMPLE_RATE;
                 }
 
-                display.SetText($"d:{degrees}, x:{xyz[0]}, y:{xyz[1]}, z:{xyz[2]}");
 
-                Thread.Sleep(10);
+                Thread.Sleep(SAMPLE_RATE);
             }
         }
 
         private static bool IsAcclUpdated(double[] value1, double[] value2) 
         {
-            var noise = 0.12;
+            var noise = 0.10;
 
             if (Math.Abs(value1[0] - value2[0]) > noise)
                 return true;

@@ -14,9 +14,9 @@ namespace ColorSound.Application.Components
 
     public class Oscillator
     {
-        public static double GetValue(double time, double frequency, OscillatorType type, double dHertz = 0, double dAmplitude = 0, double custom = 50)
+        public static double GetValue(int time, double frequency, int rate, OscillatorType type, double dHertz = 0, double dAmplitude = 0, double custom = 50)
         {
-            var freq = ToVelocity(frequency) * time + dAmplitude * dHertz * Math.Sin(ToVelocity(frequency) * time);
+            var freq = ToVelocity(frequency, rate) * time + dAmplitude * dHertz * Math.Sin(ToVelocity(frequency, rate) * time);
 
             switch (type)
             {
@@ -51,9 +51,9 @@ namespace ColorSound.Application.Components
             }
         }
 
-        private static double ToVelocity(double frequency)
+        private static double ToVelocity(double frequency, int rate)
         {
-            return frequency * 2.0 * Math.PI;
+            return frequency * 2.0 * Math.PI / rate;
         }
     }
 }

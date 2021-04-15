@@ -6,17 +6,36 @@ namespace ColorSound.Application.WaveProviders
 
     public class KeyWaveProvider : WaveProvider32
     {
-        int sample;
+        private int sample;
+        private int envelopeOn = 0;
+        private int envelopeOff = 0;
+        private Envelope envelope = new Envelope();
 
         public KeyWaveProvider()
         {
-            Amplitude = 0.25f;
-            Key = 0;
+            Amplitude = 0.5f;
+            envelope.AttackTime = 1;
+            envelope.DecayTime = 0.1;
         }
 
         public double Amplitude { get; set; }
 
         public double Key { get; set; }
+
+        public void Play(double key) 
+        {
+            envelopeOn = sample / WaveFormat.SampleRate;
+            envelopeOff = 0;
+            Key = key;
+        }
+
+        public void Pause() 
+        {
+            if (envelopeOff == 0)
+            {
+                envelopeOff = sample / WaveFormat.SampleRate;
+            }
+        }
 
         public override int Read(float[] buffer, int offset, int sampleCount)
         {
@@ -28,10 +47,12 @@ namespace ColorSound.Application.WaveProviders
 
             for (int n = 0; n < sampleCount; n++)
             {
-                buffer[n + offset] = (float)Amplitude * (float)(Oscillator.GetValue(sample / sampleRate, freq1, OscillatorType.SINE, 5, 0.001)
-                   + 0.5 * Oscillator.GetValue(sample / sampleRate, freq1, OscillatorType.TRIANGLE, 3, 0.001)
-                   + 0.1 * Oscillator.GetValue(sample / sampleRate, freq2, OscillatorType.SAW_ANA)
-                   + 0.005 * Oscillator.GetValue(sample / sampleRate, freq3, OscillatorType.NOISE));
+                var amplitude = envelope.Amplitude(sample / sampleRate, envelopeOn, envelopeOff) * Amplitude;
+
+                buffer[n + offset] = (float)amplitude * (float)(
+                   + 0.7 * Oscillator.GetValue(sample, freq1, sampleRate, OscillatorType.SINE, 5, 0.001)
+                   + 0.2 * Oscillator.GetValue(sample, freq2, sampleRate, OscillatorType.TRIANGLE, 3, 0.001)
+                   + 0.1 * Oscillator.GetValue(sample, freq3, sampleRate, OscillatorType.SAW_ANA));
 
                 sample++;
                 if (sample >= int.MaxValue) sample = 0;

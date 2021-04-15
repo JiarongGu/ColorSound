@@ -12,7 +12,6 @@ namespace ColorSound.Application.WaveProviders
         private int envelopeOff = 0;
 
         private Envelope envelope = new Envelope();
-        private List<Node> nodes = new List<Node>();
 
         public ThreeWaveProvider()
         {
@@ -29,20 +28,19 @@ namespace ColorSound.Application.WaveProviders
 
         public void Play(double freq1, double freq2, double freq3)
         {
-            var node = new Node(nodes);
-            node.TimeOn = sample / WaveFormat.SampleRate;
-            node.Process = (time, on, off) => GetValue(freq1, freq2, freq3, Amplitude, time, on, off);
+            Frequence1 = freq1;
+            Frequence2 = freq2;
+            Frequence3 = freq3;
+
+            envelopeOn = sample / WaveFormat.SampleRate;
+            envelopeOff = 0;
         }
 
         public void Pause()
         {
-            nodes.ForEach(node =>
-            {
-                if (node.TimeOff == 0)
-                {
-                    node.TimeOff = sample / WaveFormat.SampleRate;
-                }
-            });
+            if (envelopeOff == 0) { 
+                envelopeOff = sample / WaveFormat.SampleRate;
+            }
         }
 
         public override int Read(float[] buffer, int offset, int sampleCount)
@@ -51,27 +49,19 @@ namespace ColorSound.Application.WaveProviders
 
             for (int n = 0; n < sampleCount; n++)
             {
-                var time = sample / sampleRate;
-                var amplitude = envelope.Amplitude(time, envelopeOn / sampleRate, envelopeOff / sampleRate) * Amplitude;
+                var amplitude = envelope.Amplitude(sample / sampleRate, envelopeOn, envelopeOff) * Amplitude;
 
-                buffer[n + offset] = (float)amplitude * (float)(0.5 * Oscillator.GetValue(time, Frequence1, OscillatorType.SINE, 5, 0.001)
-                   + 0.3 * Oscillator.GetValue(time, Frequence2, OscillatorType.SQUARE, 5, 0.001)
-                   + 0.2 * Oscillator.GetValue(time, Frequence3, OscillatorType.TRIANGLE, 5, 0.001));
+                buffer[n + offset] = (float)amplitude * (float)(
+                   + 0.5 * Oscillator.GetValue(sample, Frequence1, sampleRate, OscillatorType.SINE, 5, 0.001)
+                   + 0.3 * Oscillator.GetValue(sample, Frequence2, sampleRate, OscillatorType.SQUARE, 5, 0.001)
+                   + 0.2 * Oscillator.GetValue(sample, Frequence3, sampleRate, OscillatorType.TRIANGLE, 5, 0.001)
+                );
 
                 sample++;
                 if (sample >= int.MaxValue) sample = 0;
             }
 
             return sampleCount;
-        }
-
-        private float GetValue(double freq1, double freq2, double freq3, double amplitude, double time, double on, double off)
-        {
-            var ampl = envelope.Amplitude(time, on, off) * amplitude;
-
-            return (float)ampl * (float)(0.5 * Oscillator.GetValue(time, freq1, OscillatorType.SINE, 5, 0.001)
-               + 0.3 * Oscillator.GetValue(time, freq2, OscillatorType.SQUARE, 5, 0.001)
-               + 0.2 * Oscillator.GetValue(time, freq3, OscillatorType.TRIANGLE, 5, 0.001));
         }
     }
 }

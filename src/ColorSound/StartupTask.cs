@@ -62,7 +62,7 @@ namespace ColorSound
 
         private static bool IsAcclUpdated(double[] value1, double[] value2) 
         {
-            var noise = 0.05;
+            var noise = 0.10;
 
             if (Math.Abs(value1[0] - value2[0]) > noise)
                 return true;

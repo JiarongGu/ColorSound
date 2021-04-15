@@ -1,10 +1,16 @@
-﻿using ColorSound.Core;
-using ColorSound.Core.Oscillators;
-using ColorSound.Core.WaveProviders;
-using NAudio.Midi;
+﻿
+using ColorSound.Application.WaveProviders;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
 using System.Timers;
+
+// This example code shows how you could implement the required main function for a 
+// Console UWP Application. You can replace all the code inside Main with your own custom code.
+
+// You should also change the Alias value in the AppExecutionAlias Extension in the 
+// Package.appxmanifest to a value that you define. To edit this file manually, right-click
+// it in Solution Explorer and select View Code, or open it with the XML Editor.
 
 namespace ColorSound.Console
 {
@@ -14,19 +20,12 @@ namespace ColorSound.Console
 
         static void Main(string[] args)
         {
-            System.Console.WriteLine($"Audio Devices {WaveOut.DeviceCount}:");
-
-            for (int device = 0; device < WaveOut.DeviceCount; device++)
-            {
-                System.Console.WriteLine($"{device}: {WaveOut.GetCapabilities(device).ProductName}");
-            }
+            var waveOut = new WasapiOutRT(AudioClientShareMode.Shared, 200);
 
             waveProvider.SetWaveFormat(44100, 1); // 16kHz mono
             waveProvider.Key = 0;
 
-            var waveOut = new WaveOut();
-
-            waveOut.Init(waveProvider);
+            waveOut.Init(() => waveProvider);
 
             var timer = new Timer(200);
 
@@ -41,7 +40,8 @@ namespace ColorSound.Console
 
         private static void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
-            if (waveProvider.Key > 40) {
+            if (waveProvider.Key > 40)
+            {
                 waveProvider.Key = 0;
             }
             waveProvider.Key += 1;

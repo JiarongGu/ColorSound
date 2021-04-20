@@ -1,31 +1,28 @@
-﻿
-using ColorSound.Application.WaveProviders;
-using NAudio.CoreAudioApi;
+﻿using ColorSound.Console.WaveProviders;
+using ColorSound.Core.Synthesizers;
 using NAudio.Wave;
 using System;
+using System.Threading.Tasks;
 using System.Timers;
-
-// This example code shows how you could implement the required main function for a 
-// Console UWP Application. You can replace all the code inside Main with your own custom code.
-
-// You should also change the Alias value in the AppExecutionAlias Extension in the 
-// Package.appxmanifest to a value that you define. To edit this file manually, right-click
-// it in Solution Explorer and select View Code, or open it with the XML Editor.
 
 namespace ColorSound.Console
 {
-    class Program
+    public class Program
     {
-        static KeyWaveProvider waveProvider = new KeyWaveProvider();
+        static KeyWaveProvider sync1 = new KeyWaveProvider(new Synthesizer1(), 44100, 1);
+        static KeyWaveProvider sync2 = new KeyWaveProvider(new Harmonica(), 44100, 1);
+        static int count = 0;
 
         static void Main(string[] args)
         {
-            var waveOut = new WasapiOutRT(AudioClientShareMode.Shared, 200);
+            var waveOut1 = new WaveOut();
+            var waveOut2 = new WaveOut();
 
-            waveProvider.SetWaveFormat(44100, 1); // 16kHz mono
-            waveProvider.Key = 0;
+            sync1.SetWaveFormat(44100, 1); // 16kHz mono
+            sync2.SetWaveFormat(44100, 1);
 
-            waveOut.Init(() => waveProvider);
+            waveOut1.Init(sync1);
+            waveOut2.Init(sync2);
 
             var timer = new Timer(200);
 
@@ -33,18 +30,34 @@ namespace ColorSound.Console
 
             timer.Start();
 
-            waveOut.Play();
+            waveOut1.Play();
+            waveOut2.Play();
 
             System.Console.ReadLine();
         }
 
         private static void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
-            if (waveProvider.Key > 40)
+            if (count % 2 == 0)
             {
-                waveProvider.Key = 0;
+                if (sync1.Key > 40)
+                {
+                    sync1.Play(0);
+                }
+                sync1.Play(sync1.Key + 1);
+                sync2.Pause();
             }
-            waveProvider.Key += 1;
+            else
+            {
+                if (sync2.Key > 40)
+                {
+                    sync2.Play(0);
+                }
+                sync2.Play(sync2.Key + 1);
+                sync1.Pause();
+            }
+
+            count++;
         }
     }
 }

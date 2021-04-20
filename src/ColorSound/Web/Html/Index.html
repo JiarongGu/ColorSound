@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>ColorSound</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="Styles/Index.css">
+</head>
+<body>
+
+    <div id="video-settings" class="video-settings video-settings-hide">
+        <table>
+            <tr>
+                <td>Video resolution: </td>
+                <td>
+                    <select id="videoResolution"></select>
+                </td>
+            </tr>
+            <tr>
+                <td>Video subtype: </td>
+                <td>
+                    <select id="videoSubtype"></select>
+                </td>
+            </tr>
+            <tr>
+                <td>Video quality: </td>
+                <td>
+                    <select id="videoQuality">
+                        <option value="0.1">10%</option>
+                        <option value="0.2">20%</option>
+                        <option value="0.3">30%</option>
+                        <option value="0.4">40%</option>
+                        <option value="0.5">50%</option>
+                        <option value="0.6">60%</option>
+                        <option value="0.7">70%</option>
+                        <option value="0.8">80%</option>
+                        <option value="0.9">90%</option>
+                        <option value="1">100%</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Event based/<br />used threads: </td>
+                <td>
+                    <select id="usedThreads">
+                        <option value="0">Event based (recommended)</option>
+                        <option value="1">1 thread</option>
+                        <option value="2">2 threads</option>
+                        <option value="3">3 threads</option>
+                        <option value="4">4 threads</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Rotation: </td>
+                <td>
+                    <select id="rotation">
+                        <option value="1">None</option>
+                        <option value="2">Clockwise 90 degrees</option>
+                        <option value="3">Clockwise 180 degrees</option>
+                        <option value="4">Clockwise 270 degrees</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input id="save" type="button" value="Save" />
+                </td>
+            </tr>
+        </table>
+
+        <br />
+        <br />
+    </div>
+
+    <img id="videoFrame" class="video-frame" src="">
+
+    <script src="JavaScript/Controls.js"></script>
+    <script src="JavaScript/VideoSetting.js"></script>
+    <script src="JavaScript/Fullscreen.js"></script>
+    <script src="JavaScript/WebSocketHelper.js"></script>
+    <script src="JavaScript/Camera.js"></script>
+</body>
+</html>

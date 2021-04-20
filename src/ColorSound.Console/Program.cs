@@ -40,20 +40,26 @@ namespace ColorSound.Console
         {
             if (count % 2 == 0)
             {
-                if (sync1.Key > 40)
+                if (sync1.Key > 32)
                 {
                     sync1.Play(0);
                 }
-                sync1.Play(sync1.Key + 1);
+                else
+                {
+                    sync1.Play(sync1.Key + 1);
+                }
                 sync2.Pause();
             }
             else
             {
-                if (sync2.Key > 40)
+                if (sync2.Key > 32)
                 {
                     sync2.Play(0);
                 }
-                sync2.Play(sync2.Key + 1);
+                else
+                {
+                    sync2.Play(sync2.Key + 1);
+                }
                 sync1.Pause();
             }
 

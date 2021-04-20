@@ -21,16 +21,16 @@ namespace ColorSound
 
         public uint Width { get; }
 
-        public Color[] GetFlattenColor(int widthFrom, int widthTo, int heightFrom, int heightTo)
+        public Color[] GetFlattenColor(int widthFrom, int widthCount, int heightFrom, int heightCount)
         {
-            var flattenColor = new Color[(widthTo - widthFrom) * (heightTo - heightFrom)];
+            var flattenColor = new Color[widthCount * heightCount];
             var count = 0;
 
-            for (var h = heightFrom; h < heightTo; h++)
+            for (var h = 0; h < heightCount; h++)
             {
-                for (var w = widthFrom; w < widthTo; w++)
+                for (var w = 0; w < widthCount; w++)
                 {
-                    flattenColor[count] = PixelColors[w, h];
+                    flattenColor[count] = PixelColors[w + widthFrom, h + heightFrom];
                     count++;
                 }
             }

@@ -1,6 +1,8 @@
 ﻿using ColorSound.Core.Synthesizers;
 using ColorSound.Helper;
 using ColorSound.WaveProviders;
+using GrovePi;
+using GrovePi.Sensors;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
@@ -32,24 +34,53 @@ namespace ColorSound
             var waveProvider1 = new GeneralWaveProvider(new Synthesizer1 { Amplitude = 0.3 }, sampleRate, 1);
             var waveOut1 = new WasapiOutRT(AudioClientShareMode.Shared, latency);
             waveOut1.Init(() => waveProvider1);
-            waveOut1.Play();
 
             var waveProvider2 = new GeneralWaveProvider(new Harmonica(), sampleRate, 2);
             var waveOut2 = new WasapiOutRT(AudioClientShareMode.Shared, latency);
             waveOut2.Init(() => waveProvider2);
-            waveOut2.Play();
 
             var imageCapture = new ImageCapture();
-            await imageCapture.StartAsync();
 
-            _ = Task.Run(() =>
+            var button = DeviceFactory.Build.ButtonSensor(Pin.DigitalPin2);
+
+            _ = Task.Run(async () =>
             {
                 var total = 16;
                 var lastColorSet = GenerateEmptyColorSet(total);
                 var colorBuffer = new List<Color[]>();
+                var lastButtonState = SensorStatus.Off;
+                var soundOn = false;
 
                 while (true)
                 {
+                    if (button.CurrentState != lastButtonState) 
+                    {
+                        lastButtonState = button.CurrentState;
+                        if (button.CurrentState == SensorStatus.On) 
+                        {
+                            soundOn = !soundOn;
+
+                            if (soundOn)
+                            {
+                                waveOut1.Play();
+                                waveOut2.Play();
+                                await imageCapture.StartAsync();
+                            }
+                            else 
+                            {
+                                waveOut1.Pause();
+                                waveOut2.Pause();
+                                await imageCapture.StopAsync();
+                            }
+                        }
+                    }
+
+                    if (!soundOn) 
+                    {
+                        Thread.Sleep(10);
+                        continue;
+                    }
+
                     if (colorBuffer.Count < 4)
                     {
                         var imagePixel = imageCapture.ImagePixelData;
@@ -72,7 +103,7 @@ namespace ColorSound
 
                         colorBuffer.Clear();
 
-                        // var updated = colorSet.Select((color, index) => IsColorUpdated(lastColorSet[index], color)).Any(x => x);
+                        var updated = colorSet.Select((color, index) => IsColorUpdated(lastColorSet[index], color)).Any(x => x);
 
                         if (IsColorUpdated(lastColorSet[0], color1))
                         {
@@ -131,7 +162,7 @@ namespace ColorSound
             for (var i = 0; i < total; i++)
             {
                 var heightOffset = height * i;
-                var flattenColor = data.GetFlattenColor(0, width, heightOffset, heightOffset + height);
+                var flattenColor = data.GetFlattenColor((int)data.Width / 2, width, heightOffset, height);
                 color[i] = flattenColor.Average();
             }
 

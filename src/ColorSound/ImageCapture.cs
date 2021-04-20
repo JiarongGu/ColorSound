@@ -43,6 +43,11 @@ namespace ColorSound
             });
         }
 
+        public async Task StopAsync() 
+        {
+            await _mediaFrameReader.StopAsync();
+        }
+
         private void FrameArrived(MediaFrameReader sender, MediaFrameArrivedEventArgs args)
         {
             GetImagePixelDataAsync().Wait();

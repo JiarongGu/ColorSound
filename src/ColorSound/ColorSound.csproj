@@ -103,6 +103,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Helper\ColorHelper.cs" />
+    <Compile Include="Helper\DispatcherHelper.cs" />
+    <Compile Include="Helper\TaskHelper.cs" />
     <Compile Include="ImageCapture.cs" />
     <Compile Include="ImagePixelData.cs" />
     <Compile Include="WaveProviders\DynamicWaveProvider.cs" />

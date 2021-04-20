@@ -1,11 +1,15 @@
-﻿using System;
+﻿using ColorSound.Helper;
+using System;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
 using Windows.Graphics.Imaging;
 using Windows.Media.Capture;
 using Windows.Media.Capture.Frames;
 using Windows.Storage.Streams;
+using Windows.UI.Core;
+
 
 namespace ColorSound
 {
@@ -13,6 +17,8 @@ namespace ColorSound
     {
         private MediaCapture _mediaCapture;
         private MediaFrameReader _mediaFrameReader;
+
+        public ImagePixelData ImagePixelData { get; set; }
 
         public void Dispose()
         {
@@ -25,16 +31,24 @@ namespace ColorSound
 
         public async Task StartAsync()
         {
-            var mediaCapture = await InitializeMediaCaptureAsync();
+            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAndAwaitAsync(CoreDispatcherPriority.Normal, async () =>
+            {
+                var mediaCapture = await InitializeMediaCaptureAsync();
 
-            var defaultFormat = mediaCapture.FrameSources.First().Value.SupportedFormats
-                .OrderByDescending(m => m.FrameRate.Numerator / (decimal)m.FrameRate.Denominator).First();
+                var defaultFormat = mediaCapture.FrameSources.First().Value.SupportedFormats
+                    .OrderByDescending(m => m.FrameRate.Numerator / (decimal)m.FrameRate.Denominator).First();
 
-            var mediaFrameReader = await InitializeFrameReaderAsync(defaultFormat);
-            await mediaFrameReader.StartAsync();
+                var mediaFrameReader = await InitializeFrameReaderAsync(defaultFormat);
+                await mediaFrameReader.StartAsync();
+            });
         }
 
-        public async Task<ImagePixelData> GetImagePixelDataAsync()
+        private void FrameArrived(MediaFrameReader sender, MediaFrameArrivedEventArgs args)
+        {
+            GetImagePixelDataAsync().Wait();
+        }
+
+        public async Task GetImagePixelDataAsync()
         {
             var frame = _mediaFrameReader.TryAcquireLatestFrame();
 
@@ -49,7 +63,7 @@ namespace ColorSound
             }
 
             if (frameBitmapTry == null)
-                return null;
+                return;
 
 
             using (var frameBitmap = frameBitmapTry)
@@ -80,10 +94,10 @@ namespace ColorSound
                     }
                 }
 
-                return new ImagePixelData(decoder.PixelWidth, decoder.PixelHeight, pixels, pixelColors);
+                ImagePixelData = new ImagePixelData(decoder.PixelWidth, decoder.PixelHeight, pixels, pixelColors);
             }
-
         }
+
 
         public async Task<MediaCapture> InitializeMediaCaptureAsync()
         {
@@ -138,6 +152,7 @@ namespace ColorSound
             await mediaFrameSource.SetFormatAsync(videoFormat);
 
             _mediaFrameReader = await _mediaCapture.CreateFrameReaderAsync(mediaFrameSource);
+            _mediaFrameReader.FrameArrived += FrameArrived;
             return _mediaFrameReader;
         }
     }

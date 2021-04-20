@@ -1,13 +1,14 @@
 ﻿using ColorSound.Core.Synthesizers;
+using ColorSound.Helper;
 using ColorSound.WaveProviders;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -15,8 +16,6 @@ namespace ColorSound
 {
     public sealed partial class MainPage : Page
     {
-        private int count;
-
         public MainPage()
         {
             InitializeComponent();
@@ -27,42 +26,82 @@ namespace ColorSound
 
         private async void MainPage_Loaded(object sender, RoutedEventArgs eventArgs)
         {
-            var waveProvider = new GeneralWaveProvider(new Harmonica(), 44100, 1);
-            var waveOut = new WasapiOutRT(AudioClientShareMode.Shared, 50);
+            var sampleRate = 22000;
+            var latency = 200;
+
+            var waveProvider1 = new GeneralWaveProvider(new Synthesizer1 { Amplitude = 0.3 }, sampleRate, 1);
+            var waveOut1 = new WasapiOutRT(AudioClientShareMode.Shared, latency);
+            waveOut1.Init(() => waveProvider1);
+            waveOut1.Play();
+
+            var waveProvider2 = new GeneralWaveProvider(new Harmonica(), sampleRate, 2);
+            var waveOut2 = new WasapiOutRT(AudioClientShareMode.Shared, latency);
+            waveOut2.Init(() => waveProvider2);
+            waveOut2.Play();
+
             var imageCapture = new ImageCapture();
             await imageCapture.StartAsync();
 
-            waveOut.Init(() => waveProvider);
-            waveOut.Play();
+            _ = Task.Run(() =>
+            {
+                var total = 16;
+                var lastColorSet = GenerateEmptyColorSet(total);
+                var colorBuffer = new List<Color[]>();
 
-            //var timer = new Timer(200);
+                while (true)
+                {
+                    if (colorBuffer.Count < 4)
+                    {
+                        var imagePixel = imageCapture.ImagePixelData;
 
-            //timer.Elapsed += OnTimedEvent;
+                        if (imagePixel != null)
+                        {
+                            colorBuffer.Add(GetReducedPixel(imagePixel, 40, (int)imagePixel.Height / total));
+                        }
+                        else 
+                        {
+                            colorBuffer.Add(GenerateEmptyColorSet(total));
+                        }
+                    }
+                    else
+                    {
+                        var colorSet = colorBuffer.Average();
 
-            //timer.Start();
+                        var color1 = colorSet[0];
+                        var color2 = colorSet[5];
 
-            Color lastColor = Color.FromArgb(0, 0, 0);
+                        colorBuffer.Clear();
 
-            _ = Task.Run(async () =>
-              {
-                  while (true)
-                  {
-                      var imagePixel = await imageCapture.GetImagePixelDataAsync();
-                      Color color = imagePixel != null ? GetReducedPixel(imagePixel, 10, (int)imagePixel.Height / 16)[8] : Color.FromArgb(0, 0, 0);
+                        // var updated = colorSet.Select((color, index) => IsColorUpdated(lastColorSet[index], color)).Any(x => x);
 
-                      if (IsColorUpdated(lastColor, color))
-                      {
-                          var hue = color.GetHue();
-                          var saturation = color.GetSaturation();
-                          var value = Math.Sqrt(Math.Pow(color.R, 2) + Math.Pow(color.G, 2) + Math.Pow(color.B, 2));
+                        if (IsColorUpdated(lastColorSet[0], color1))
+                        {
+                            waveProvider1.Play(GetColorFactors(color1));
+                            lastColorSet[0] = color1;
+                        }
 
-                          waveProvider.Play(new double[] { value, hue, saturation });
-                          lastColor = color;
-                      }
+                        if (IsColorUpdated(lastColorSet[5], color2))
+                        {
+                            waveProvider2.Play(GetColorFactors(new Color[] { lastColorSet[5], color2 }.Average()));
+                            lastColorSet[5] = color2;
+                        }
+                    }
+                    Thread.Sleep(10);
+                }
+            });
+        }
 
-                      Thread.Sleep(10);
-                  }
-              });
+        private double[] GetColorFactors(Color color) 
+        {
+            var hue = color.GetHue();
+            var saturation = color.GetSaturation();
+            var value = Math.Sqrt(Math.Pow(color.R, 2) + Math.Pow(color.G, 2) + Math.Pow(color.B, 2));
+            return new double[] { value, hue, saturation };
+        }
+
+        private Color[] GenerateEmptyColorSet(int total) 
+        {
+            return Enumerable.Range(0, total).Select(i => Color.FromArgb(0, 0, 0)).ToArray();
         }
 
         private bool IsColorUpdated(Color value1, Color value2)
@@ -84,7 +123,6 @@ namespace ColorSound
             return false;
         }
 
-
         public Color[] GetReducedPixel(ImagePixelData data, int width, int height)
         {
             var total = data.Height / height;
@@ -94,13 +132,7 @@ namespace ColorSound
             {
                 var heightOffset = height * i;
                 var flattenColor = data.GetFlattenColor(0, width, heightOffset, heightOffset + height);
-
-                var red = flattenColor.Select(c => (int)c.R).Average();
-                var green = flattenColor.Select(c => (int)c.G).Average();
-                var blue = flattenColor.Select(c => (int)c.B).Average();
-                var alpha = flattenColor.Select(c => (int)c.A).Average();
-
-                color[i] = Color.FromArgb((int)alpha, (int)red, (int)green, (int)blue);
+                color[i] = flattenColor.Average();
             }
 
             return color;

@@ -103,25 +103,16 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Configuration\ConfigurationFile.cs" />
-    <Compile Include="Configuration\ConfigurationFileHelper.cs" />
-    <Compile Include="Devices\Camera.cs" />
-    <Compile Include="Helper\DispatcherHelper.cs" />
-    <Compile Include="SimpleCamera.cs" />
+    <Compile Include="ImageCapture.cs" />
+    <Compile Include="ImagePixelData.cs" />
     <Compile Include="WaveProviders\DynamicWaveProvider.cs" />
+    <Compile Include="WaveProviders\GeneralWaveProvider.cs" />
     <Compile Include="WaveProviders\KeyWaveProvider.cs" />
     <Compile Include="WaveProviders\WaveProvider32.cs" />
-    <Compile Include="Web\HttpContentType.cs" />
-    <Compile Include="Web\HttpServer.cs" />
-    <Compile Include="Web\HttpServerRequest.cs" />
-    <Compile Include="Web\HttpServerResponse.cs" />
-    <Compile Include="Web\HttpStatusCode.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Helper\TaskHelper.cs" />
-    <Compile Include="Web\WebSocket.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -129,13 +120,6 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Web\Html\Index.html" />
-    <Content Include="Web\JavaScript\Camera.js" />
-    <Content Include="Web\JavaScript\Controls.js" />
-    <Content Include="Web\JavaScript\Fullscreen.js" />
-    <Content Include="Web\JavaScript\VideoSetting.js" />
-    <Content Include="Web\JavaScript\WebSocketHelper.js" />
-    <Content Include="Web\Styles\Index.css" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />

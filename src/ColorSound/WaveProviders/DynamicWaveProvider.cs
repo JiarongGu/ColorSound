@@ -13,7 +13,7 @@ namespace ColorSound.WaveProviders
             Synthesizers = new List<SynthesizerBase>();
         }
 
-        public IReadOnlyList<SynthesizerBase> Synthesizers { get; }
+        public IList<SynthesizerBase> Synthesizers { get; }
 
         public void Play(double[][] frequencies)
         {

@@ -101,7 +101,7 @@ namespace ColorSound.Process
             _buffer.Clear();
 
             ProcessWave(colorSet, _wave1, 0, 10, (color, last) => GetColorFactors(new Color[] { color, last }.Average()));
-            ProcessWave(colorSet, _wave2, 5, 20, (color, last) => GetColorFactors(new Color[] { color, last }.Average()));
+            ProcessWave(colorSet, _wave2, 5, 15, (color, last) => GetColorFactors(new Color[] { color, last }.Average()));
         }
 
         private void ProcessWave(Color[] colorSet, IGeneralWaveProvider wave, int index, int idle, Func<Color, Color, double[]> iterator) 
@@ -118,6 +118,7 @@ namespace ColorSound.Process
             else if (_counters[index] > idle)
             {
                 wave.Pause();
+                _counters[index] = 0;
             }
             else
             {

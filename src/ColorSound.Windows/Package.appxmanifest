@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"  xmlns:iot="http://schemas.microsoft.com/appx/manifest/iot/windows10" IgnorableNamespaces="uap mp uap3 iot">
-  <Identity Name="70d42c8c-68c6-4388-9eea-c34eaa77f746" Publisher="CN=Jiarong Gu" Version="1.1.0.0" />
+  <Identity Name="4cf3af9a-6d7f-443f-b0bc-526334367abe" Publisher="CN=Jiarong Gu" Version="1.1.0.0" />
   <mp:PhoneIdentity PhoneProductId="7b497e6e-7800-422c-a0ef-998ed4935084" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>ColorSound</DisplayName>
+    <DisplayName>ColorSound.Windows</DisplayName>
     <PublisherDisplayName>Jiarong Gu</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -14,8 +14,8 @@
     <Resource Language="x-generate" />
   </Resources>
   <Applications>
-    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="ColorSound.App">
-      <uap:VisualElements DisplayName="ColorSound" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="ColorSound" BackgroundColor="transparent">
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="ColorSound.Windows.App">
+      <uap:VisualElements DisplayName="ColorSound.Windows" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="ColorSound.Windows" BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />

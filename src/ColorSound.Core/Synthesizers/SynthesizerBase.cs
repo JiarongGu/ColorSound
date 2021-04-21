@@ -22,6 +22,8 @@ namespace ColorSound.Core.Synthesizers
 
         public double Amplitude { get; set; }
 
+        public double AmplitudeFactor { get; set; } = 1;
+
         public void Play(double[] frequencies)
         {
             _frequencies = frequencies;
@@ -41,7 +43,7 @@ namespace ColorSound.Core.Synthesizers
             if (_frequencies == null || _frequencies.Length != _frequencyCount)
                 return 0;
 
-            var amplitude = _envelope.Amplitude(_time, _on, _off) * Amplitude;
+            var amplitude = _envelope.Amplitude(_time, _on, _off) * Amplitude * AmplitudeFactor;
             return amplitude * Next(_frequencies, _time);
         }
 

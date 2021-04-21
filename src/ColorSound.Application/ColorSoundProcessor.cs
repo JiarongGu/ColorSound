@@ -15,7 +15,7 @@ namespace ColorSound.Process
     {
         private static int SAMPLE_RATE = 22000;
         private static int LATENCY = 200;
-        private static int SAMPLE_COLOR_COUNT = 10;
+        private static int SAMPLE_COLOR_COUNT = 16;
         private static int SAMPLE_COLOR_RANGE = 20;
         private static int NOISE_FACTOR = 20;
 
@@ -132,8 +132,8 @@ namespace ColorSound.Process
             var saturation = color.GetSaturation();
 
             var keyBase = 1.0594630943592952645618252949463;
-            var value = Math.Sqrt(Math.Pow(color.R, 2) + Math.Pow(color.G, 2) + Math.Pow(color.B, 2));
-            var factor = value * Math.Pow(saturation, 0.5) / 3;
+            // var value = Math.Sqrt(Math.Pow(color.R, 2) + Math.Pow(color.G, 2) + Math.Pow(color.B, 2));
+            var factor = 256 * Math.Pow(saturation, 0.5) / 2;
 
             var keyValue1 = factor * Math.Pow(keyBase, hue / 10);
             var keyValue2 = factor * Math.Pow(keyBase, hue / 10 + 12);

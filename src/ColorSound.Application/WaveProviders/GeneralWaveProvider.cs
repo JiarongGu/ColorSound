@@ -22,7 +22,6 @@ namespace ColorSound.Process.WaveProviders
     {
         private GeneralWave _wave;
         private int _sampleRate;
-        private bool _playing = false;
 
         public GeneralWaveProvider(T synthesizer, int sampleRate, int channels) : base(sampleRate, channels)
         {
@@ -49,7 +48,6 @@ namespace ColorSound.Process.WaveProviders
         public void Play(double[] frequencies, double? amplitudeFactor)
         {
             _wave.Play(frequencies);
-            _playing = true;
 
             if (amplitudeFactor != null) 
             {
@@ -59,11 +57,7 @@ namespace ColorSound.Process.WaveProviders
 
         public void Pause()
         {
-            if (_playing)
-            {
-                _wave.Pause();
-                _playing = false;
-            }
+            _wave.Pause();
         }
 
         public override int Read(float[] buffer, int offset, int sampleCount)

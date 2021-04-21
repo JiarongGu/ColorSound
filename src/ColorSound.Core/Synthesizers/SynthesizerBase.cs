@@ -33,7 +33,10 @@ namespace ColorSound.Core.Synthesizers
 
         public void Pause()
         {
-            _off = _time;
+            if (_off == 0)
+            {
+                _off = _time;
+            }
         }
 
         public double Next(double time)

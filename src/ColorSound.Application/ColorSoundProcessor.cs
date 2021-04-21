@@ -100,7 +100,7 @@ namespace ColorSound.Process
             var colorSet = _buffer.Average();
             _buffer.Clear();
 
-            ProcessWave(colorSet, _wave1, 0, 10, (color, last) => GetColorFactors(color));
+            ProcessWave(colorSet, _wave1, 0, 10, (color, last) => GetColorFactors(new Color[] { color, last }.Average()));
             ProcessWave(colorSet, _wave2, 5, 20, (color, last) => GetColorFactors(new Color[] { color, last }.Average()));
         }
 
@@ -132,7 +132,7 @@ namespace ColorSound.Process
 
             var keyBase = 1.0594630943592952645618252949463;
             var value = Math.Sqrt(Math.Pow(color.R, 2) + Math.Pow(color.G, 2) + Math.Pow(color.B, 2));
-            var factor = value * Math.Pow(saturation, 0.5) / 5;
+            var factor = value * Math.Pow(saturation, 0.5) / 3;
 
             var keyValue1 = factor * Math.Pow(keyBase, hue / 10);
             var keyValue2 = factor * Math.Pow(keyBase, hue / 10 + 12);

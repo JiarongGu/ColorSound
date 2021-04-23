@@ -9,7 +9,7 @@ namespace ColorSound.Console
 {
     public class Program
     {
-        static KeyWaveProvider sync1 = new KeyWaveProvider(new Synthesizer1(), 44100, 1);
+        static KeyWaveProvider sync1 = new KeyWaveProvider(new DrumKick(), 44100, 1);
         static KeyWaveProvider sync2 = new KeyWaveProvider(new Harmonica(), 44100, 1);
         static int count = 0;
 
@@ -31,7 +31,7 @@ namespace ColorSound.Console
             timer.Start();
 
             waveOut1.Play();
-            waveOut2.Play();
+            // waveOut2.Play();
 
             System.Console.ReadLine();
         }

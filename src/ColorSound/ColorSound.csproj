@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{DC8641B5-1EBD-48F3-B324-FF3E47045F3E}</ProjectGuid>
+    <ProjectGuid>{45EFFE1C-7C27-48FC-9521-717E9C73563B}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ColorSound</RootNamespace>

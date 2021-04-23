@@ -43,7 +43,7 @@ namespace ColorSound.Core.Synthesizers
         {
             _time = time;
 
-            if (_frequencies == null || _frequencies.Length != _frequencyCount)
+            if (_frequencies == null || _frequencies.Length < _frequencyCount)
                 return 0;
 
             var amplitude = _envelope.Amplitude(_time, _on, _off) * Amplitude * AmplitudeFactor;

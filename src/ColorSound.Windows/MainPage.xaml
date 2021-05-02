@@ -5,9 +5,14 @@
     xmlns:local="using:ColorSound.Windows"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="480">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+        <Image Name="imgVideo" Stretch="Fill" HorizontalAlignment="Left" Height="460" Width="613" Margin="10,0,0,0" VerticalAlignment="Center"/>
+        <Image Name="imgNoPicture" Stretch="Fill" HorizontalAlignment="Left" Height="460" Width="613" Margin="10,0,0,0" VerticalAlignment="Center"/>
+        <Button  Name="btnStart" Content="START" Margin="0,0,20,20" VerticalAlignment="Bottom" Height="40" Width="134" FontWeight="Bold" FontSize="18" FocusVisualPrimaryBrush="{x:Null}" HorizontalAlignment="Right"/>
+        <Slider Name="silderVolume" HorizontalAlignment="Left" Margin="646,364,0,0" VerticalAlignment="Top" Width="134" FocusVisualPrimaryBrush="{x:Null}" Orientation="Horizontal" Height="32" Minimum="0" Maximum="100"/>
+        <Rectangle Name="color1" HorizontalAlignment="Left"  Width="56" Height="56" Margin="646,281,0,0" Stroke="Black" Fill="Black" VerticalAlignment="Top"/>
+        <Rectangle Name="color2" HorizontalAlignment="Left"  Width="56" Height="56" Margin="724,281,0,0" Stroke="Black" Fill="Black" VerticalAlignment="Top"/>
     </Grid>
 </Page>

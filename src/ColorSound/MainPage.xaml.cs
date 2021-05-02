@@ -19,7 +19,7 @@ namespace ColorSound
 
         private void MainPage_Loaded(object sender, RoutedEventArgs eventArgs)
         {
-            var processor = new ColorSoundProcessor();
+            var processor = new ColorSoundProcessor(0.3);
             var button = DeviceFactory.Build.ButtonSensor(Pin.DigitalPin2);
             
             _ = Task.Run(async () =>

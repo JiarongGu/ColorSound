@@ -9,13 +9,16 @@ using Windows.Media.Capture;
 using Windows.Media.Capture.Frames;
 using Windows.Storage.Streams;
 using Windows.UI.Core;
-
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace ColorSound.Process
 {
     public class ImageCapture : IDisposable
     {
+        public event EventHandler<SoftwareBitmap> FrameUpdated;
+
         private MediaCapture _mediaCapture;
+
         private MediaFrameReader _mediaFrameReader;
 
         public ImagePixelData ImagePixelData { get; set; }
@@ -79,19 +82,21 @@ namespace ColorSound.Process
                 encoder.SetSoftwareBitmap(bitmap);
                 await encoder.FlushAsync();
 
+                FrameUpdated?.Invoke(this, bitmap);
+
                 var decoder = await BitmapDecoder.CreateAsync(BitmapDecoder.JpegDecoderId, stream);
                 var pixelData = (await decoder.GetPixelDataAsync()).DetachPixelData();
                 var pixels = new byte[decoder.PixelWidth, decoder.PixelHeight][];
                 var pixelColors = new Color[decoder.PixelWidth, decoder.PixelHeight];
-
+                
                 for (var h = 0; h < decoder.PixelHeight; h++)
                 {
                     for (var w = 0; w < decoder.PixelWidth; w++)
                     {
                         var offset = h * w * 4;
-                        var red = pixelData[offset];
-                        var green = pixelData[offset + 1];
-                        var blue = pixelData[offset + 2];
+                        var blue = pixelData[offset];
+                        var green = pixelData[offset + 1] ;
+                        var red = pixelData[offset + 2];
                         var alpha = pixelData[offset + 3];
 
                         pixels[w, h] = new byte[] { red, green, blue, alpha };

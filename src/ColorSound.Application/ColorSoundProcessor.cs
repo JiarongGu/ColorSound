@@ -8,14 +8,15 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.Graphics.Imaging;
 
 namespace ColorSound.Process
 {
-    public class ColorSoundProcessor: IDisposable
+    public class ColorSoundProcessor : IDisposable
     {
         private static int SAMPLE_RATE = 22000;
-        private static int LATENCY = 200;
-        private static int SAMPLE_COLOR_COUNT = 16;
+        private static int LATENCY = 100;
+        private static int SAMPLE_COLOR_COUNT = 48;
         private static int SAMPLE_COLOR_RANGE = 20;
         private static int NOISE_FACTOR = 20;
 
@@ -25,6 +26,7 @@ namespace ColorSound.Process
 
         private GeneralWaveProvider<Synthesizer1> _wave1;
         private GeneralWaveProvider<Harmonica> _wave2;
+        private IGeneralWaveProvider[] _waves;
 
         private WasapiOutRT _waveOutput1;
         private WasapiOutRT _waveOutput2;
@@ -36,19 +38,30 @@ namespace ColorSound.Process
         private bool _output = false;
         private long[] _counters = new long[SAMPLE_COLOR_COUNT];
 
-        public ColorSoundProcessor() 
+        public event EventHandler<SoftwareBitmap> FrameUpdated;
+
+        public event EventHandler<Color[]> ColorUpdated;
+
+        public ColorSoundProcessor(double amplitude)
         {
             _imageCapture = new ImageCapture();
+            _imageCapture.FrameUpdated += OnFrameUpdated;
 
-            _wave1 = new GeneralWaveProvider<Synthesizer1>(new Synthesizer1 { Amplitude = 0.3 }, SAMPLE_RATE, 1);
+            _wave1 = new GeneralWaveProvider<Synthesizer1>(new Synthesizer1 { Amplitude = amplitude }, SAMPLE_RATE, 1);
             _waveOutput1 = new WasapiOutRT(AudioClientShareMode.Shared, LATENCY);
             _waveOutput1.Init(() => _wave1);
 
-            _wave2 = new GeneralWaveProvider<Harmonica>(new Harmonica { Amplitude = 0.3 }, SAMPLE_RATE, 2);
+            _wave2 = new GeneralWaveProvider<Harmonica>(new Harmonica { Amplitude = amplitude }, SAMPLE_RATE, 2);
             _waveOutput2 = new WasapiOutRT(AudioClientShareMode.Shared, LATENCY);
             _waveOutput2.Init(() => _wave2);
 
+            _waves = new IGeneralWaveProvider[] { _wave1, _wave2 };
             _waveOutputs = new WasapiOutRT[] { _waveOutput1, _waveOutput2 };
+        }
+
+        protected virtual void OnFrameUpdated(object sender, SoftwareBitmap e)
+        {
+            FrameUpdated?.Invoke(this, e);
         }
 
         public void Dispose()
@@ -57,6 +70,14 @@ namespace ColorSound.Process
             _waveOutput1.Dispose();
             _waveOutput2.Dispose();
         }
+
+        public double Amplitude
+        {
+            get => _waves[0].Synthesizer.Amplitude;
+            set => Array.ForEach(_waves, wave => wave.Synthesizer.Amplitude = value);
+        }
+
+        public Color[] ProcessedColor => _lastProcessed;
 
         public async Task RunProcessAsync(bool output)
         {
@@ -100,11 +121,16 @@ namespace ColorSound.Process
             var colorSet = _buffer.Average();
             _buffer.Clear();
 
-            ProcessWave(colorSet, _wave1, 0, 10, (color, last) => GetColorFactors(new Color[] { color, last }.Average()));
-            ProcessWave(colorSet, _wave2, 5, 15, (color, last) => GetColorFactors(new Color[] { color, last }.Average()));
+            var wave1Point = (int)(SAMPLE_COLOR_COUNT * 0.4);
+            var wave2Point = (int)(SAMPLE_COLOR_COUNT * 0.6);
+
+            ProcessWave(colorSet, _wave1, wave1Point, 10, (color, last) => GetColorFactors(new Color[] { color, last }.Average()));
+            ProcessWave(colorSet, _wave2, wave2Point, 15, (color, last) => GetColorFactors(color));
+
+            ColorUpdated?.Invoke(this, new Color[] { _lastProcessed[wave1Point], _lastProcessed[wave2Point]  });
         }
 
-        private void ProcessWave(Color[] colorSet, IGeneralWaveProvider wave, int index, int idle, Func<Color, Color, double[]> iterator) 
+        private void ProcessWave(Color[] colorSet, IGeneralWaveProvider wave, int index, int idle, Func<Color, Color, double[]> iterator)
         {
             var color = colorSet[index];
 
@@ -132,12 +158,12 @@ namespace ColorSound.Process
             var saturation = color.GetSaturation();
 
             var keyBase = 1.0594630943592952645618252949463;
-            // var value = Math.Sqrt(Math.Pow(color.R, 2) + Math.Pow(color.G, 2) + Math.Pow(color.B, 2));
-            var factor = 256 * Math.Pow(saturation, 0.5) / 2;
+            var factor = 256 * Math.Pow(saturation, 0.2) / 5;
+            var node = Math.Pow(Math.Abs(255 - hue), 0.8);
 
-            var keyValue1 = factor * Math.Pow(keyBase, hue / 10);
-            var keyValue2 = factor * Math.Pow(keyBase, hue / 10 + 12);
-            var keyValue3 = factor * Math.Pow(keyBase, hue / 10 + 24);
+            var keyValue1 = factor * Math.Pow(keyBase, node / 10);
+            var keyValue2 = factor * Math.Pow(keyBase, node / 10 + 12);
+            var keyValue3 = factor * Math.Pow(keyBase, node / 10 + 24);
 
             return new double[] { keyValue1, keyValue2, keyValue3 };
         }

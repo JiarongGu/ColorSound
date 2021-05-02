@@ -106,8 +106,6 @@
     <Compile Include="Helper\ColorHelper.cs" />
     <Compile Include="Helper\DispatcherHelper.cs" />
     <Compile Include="Helper\TaskHelper.cs" />
-    <Compile Include="ImageCapture.cs" />
-    <Compile Include="ImagePixelData.cs" />
     <Compile Include="WaveProviders\DynamicWaveProvider.cs" />
     <Compile Include="WaveProviders\GeneralWaveProvider.cs" />
     <Compile Include="WaveProviders\KeyWaveProvider.cs" />
@@ -157,6 +155,10 @@
     <None Include="ColorSound_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ColorSound.Application\ColorSound.Process.csproj">
+      <Project>{C57D90EE-9108-400E-8572-B7AC640062F9}</Project>
+      <Name>ColorSound.Process</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ColorSound.Core\ColorSound.Core.csproj">
       <Project>{30de65f6-ac1b-4787-a043-064dc6012fc4}</Project>
       <Name>ColorSound.Core</Name>
